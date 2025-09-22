@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Orifice Score System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Orifice Score System</h1>
+
+  <!-- ルール -->
+  <div class="panel">
+    勝ち抜け <input id="win" type="number" value="5"/> ／
+    失格 <input id="lose" type="number" value="3"/> ／
+    誤答休 <input id="rest" type="number" value="1"/>
+    <span id="limitWrap" class="hidden"> ／ <label><input type="checkbox" id="limitToggle"/> 個人◯上限</label> <input id="limit" type="number" value="10" min="1"/></span>
+    <div id="ruleSummary" style="margin-top:6px;font-weight:700"></div>
+  </div>
+
+  <!-- 操作 -->
+  <div class="panel">
+    <div class="row">
+      <input id="nameInput" type="text" placeholder="名前を入力 (Enterで追加)"/>
+      <button class="btn add-btn" id="addBtn">追加</button>
+      <button class="btn reset-btn" id="resetBtn">リセット</button>
+      <label class="option-label"><input type="checkbox" id="teamMode"/> チーム戦</label>
+      <label class="option-label"><input type="checkbox" id="editMode"/> 編集モード</label>
+      <label class="option-label"><input type="checkbox" id="diceToggle"/> サイコロ表示</label>
+      <span id="personDeleteControls" class="hidden"><button class="btn del-btn" onclick="deleteAllPeople()">全削除</button></span>
+      <span id="teamDeleteControls" class="hidden"><button class="btn del-btn" onclick="deleteAllTeams()">全チーム削除</button></span>
+    </div>
+    <div class="row hidden" id="teamControls">
+      <input id="teamInput" type="text" placeholder="チーム名 (Enterで追加)"/>
+      <button class="btn add-btn" id="teamAddBtn">チーム追加</button>
+    </div>
+    <div id="diceWrap" class="dice-wrap">
+      <div class="dice-buttons">
+        <button class="die" data-sides="6">🎲 d6</button>
+        <button class="die" data-sides="100">🎲 d100</button>
+      </div>
+      <div class="dice-results">
+        <div class="dice-box" id="d6"></div>
+        <div class="dice-box" id="d100"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- メイン -->
+  <div class="panel" id="main"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
