@@ -16,10 +16,11 @@ function loadData(){
   }
 }
 
+// ===== People / Teams =====
 function addPerson(){
   const name = $("nameInput").value.trim();
   if(!name) return;
-  people.push({ name, maru:0, batsu:0, team:"" });
+  people.push({ name, maru:0, batsu:0, team:"", status:"normal" });
   $("nameInput").value = "";
   saveData(); render();
 }
@@ -36,38 +37,34 @@ function addTeam(){
 }
 function deleteAllPeople(){ people = []; saveData(); render(); }
 function deleteAllTeams(){ teams = []; people.forEach(p => p.team=""); saveData(); render(); }
-
-// 個別チーム削除
 function deleteTeam(teamName){
   teams = teams.filter(t => t !== teamName);
   people.forEach(p => { if(p.team === teamName) p.team = ""; });
   saveData(); render();
 }
 
+// ===== Scores =====
 function changeScore(i, key, d){
   const p = people[i];
   p[key] += d;
 
-  // チーム戦＋個人◯上限ONの時は上限でクリップ
   if(key === 'maru' && $("teamMode").checked && $("limitToggle")?.checked){
     const lim = +$("limit").value || 0;
     if(p[key] > lim) p[key] = lim;
   }
-
   if(p[key] < 0) p[key] = 0;
   saveData(); render();
 }
-
 function saveName(i, v){
   people[i].name = (v || '').trim() || people[i].name;
   saveData(); render();
 }
-
 function resetScores(){
-  people.forEach(p => { p.maru = 0; p.batsu = 0; });
+  people.forEach(p => { p.maru = 0; p.batsu = 0; p.status = "normal"; });
   saveData(); render();
 }
 
+// ===== Dice =====
 function roll(btn){
   const sides = +btn.dataset.sides;
   btn.classList.add('shake');
@@ -123,8 +120,8 @@ function render(){
   if(!main) return;
   main.innerHTML = '';
 
+  // === 個人戦 ===
   if(!teamMode){
-    // --- 個人カード ---
     const panel = document.createElement('section');
     panel.className = 'panel';
 
@@ -148,8 +145,29 @@ function render(){
       card.setAttribute("ondragover",  "onDragOver(event)");
       card.setAttribute("ondragend",   "onDragEnd(event)");
 
-      if(p.maru >= w)                 card.innerHTML += `<div class="badge win">勝ち抜け</div>`;
-      else if(l > 0 && p.batsu >= l)  card.innerHTML += `<div class="badge lose">失格</div>`;
+      // --- 状態判定（個人戦のみ） ---
+      let newStatus = "normal";
+      if(p.maru >= w) newStatus = "win";
+      else if(l > 0 && p.batsu >= l) newStatus = "lose";
+
+      card.classList.remove("win-state", "lose-state");
+      if(newStatus === "win") card.classList.add("win-state");
+      if(newStatus === "lose") card.classList.add("lose-state");
+
+      if(newStatus !== p.status){
+        if(newStatus === "win"){
+          requestAnimationFrame(()=>{
+            card.classList.add("win-animate");
+            setTimeout(()=>card.classList.remove("win-animate"),1200);
+          });
+        } else if(newStatus === "lose"){
+          requestAnimationFrame(()=>{
+            card.classList.add("lose-animate");
+            setTimeout(()=>card.classList.remove("lose-animate"),800);
+          });
+        }
+      }
+      p.status = newStatus;
 
       if($("editMode").checked){
         card.innerHTML += `<input value="${p.name}" onblur="saveName(${i}, this.value)" title="${p.name}" />`;
@@ -175,11 +193,10 @@ function render(){
     panel.appendChild(wrap);
     main.appendChild(panel);
 
+  // === チーム戦 ===
   }else{
-    // --- チームボード ---
     const panel = document.createElement('section');
     panel.className = 'panel';
-
     const container = document.createElement('div');
     container.className = 'team-container';
 
@@ -199,7 +216,6 @@ function render(){
       header.className = 'team-header';
       const winMark = sumM >= w ? `<span class='team-win'>WIN!</span>` : '';
 
-      // 編集モードONならチーム削除ボタン追加（未所属は削除不可）
       let delTeamBtn = "";
       if($("editMode").checked && t !== "未所属"){
         delTeamBtn = `<button class="btn del-btn" onclick="deleteTeam('${t}')">削除</button>`;
@@ -207,6 +223,16 @@ function render(){
 
       header.innerHTML = `<span>${t}</span><span>${sumM} - ${sumB} ${winMark} ${delTeamBtn}</span>`;
       box.appendChild(header);
+
+      // --- チーム勝利演出 ---
+      box.classList.remove("team-win-state");
+      if(sumM >= w){
+        box.classList.add("team-win-state");
+        requestAnimationFrame(()=>{
+          box.classList.add("team-win-animate");
+          setTimeout(()=> box.classList.remove("team-win-animate"), 1500);
+        });
+      }
 
       const table = document.createElement('table');
       table.innerHTML = `<thead><tr><th>名前</th><th>◯</th><th>✕</th><th>操作</th></tr></thead>`;
