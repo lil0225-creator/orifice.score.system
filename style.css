@@ -285,3 +285,94 @@ td{ white-space:nowrap; }
   100% { transform: scale(1);   box-shadow:0 0 25px var(--green); }
 }
 
+/* 勝ち抜けカットイン */
+.cutin {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  padding: 30px 60px;
+  background: rgba(0, 229, 255, 0.15);
+  border: 3px solid var(--neon);
+  border-radius: 20px;
+  font-size: 64px;
+  font-weight: 900;
+  color: var(--neon);
+  /* ✅ メタリック調（シルバー縁）＋ネオングロー */
+  text-shadow:
+    -2px -2px 0 #ccc,
+     2px -2px 0 #ccc,
+    -2px  2px 0 #ccc,
+     2px  2px 0 #ccc,
+    -2px  0px 0 #ccc,
+     2px  0px 0 #ccc,
+     0px -2px 0 #ccc,
+     0px  2px 0 #ccc,
+     0 0 12px var(--green),
+     0 0 24px var(--neon);
+  letter-spacing: 4px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+
+
+.cutin.show {
+  animation: cutinFlash 2s ease forwards;
+}
+
+@keyframes cutinFlash {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(-10deg); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
+  70%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* 失格カットイン */
+.cutin-lose {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  padding: 30px 60px;
+  background: rgba(255, 23, 68, 0.15);
+  border: 3px solid var(--red);
+  border-radius: 20px;
+  font-size: 64px;
+  font-weight: 900;
+  color: var(--red);
+  /* ✅ メタリック調（ガンメタ縁）＋ネオングロー */
+  text-shadow:
+    -2px -2px 0 #666,
+     2px -2px 0 #666,
+    -2px  2px 0 #666,
+     2px  2px 0 #666,
+    -2px  0px 0 #666,
+     2px  0px 0 #666,
+     0px -2px 0 #666,
+     0px  2px 0 #666,
+     0 0 12px var(--red),
+     0 0 24px var(--red);
+  letter-spacing: 4px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+
+
+.cutin-lose.show {
+  animation: cutinLoseFlash 2s ease forwards;
+}
+
+@keyframes cutinLoseFlash {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(10deg); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
+  70%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+

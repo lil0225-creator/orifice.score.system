@@ -105,6 +105,34 @@ function onDropToTeam(e, team){
   saveData(); render();
 }
 
+// ===== 勝ち抜けカットイン =====
+function showCutin(text){
+  const cutin = document.getElementById("cutin");
+  const cutinText = document.getElementById("cutinText");
+  if(!cutin || !cutinText) return;
+
+  cutinText.textContent = text;
+  cutin.classList.remove("show");
+  void cutin.offsetWidth; // アニメ再トリガー用
+  cutin.classList.add("show");
+
+  setTimeout(()=> cutin.classList.remove("show"), 2000);
+}
+
+// ===== 失格カットイン =====
+function showCutinLose(text){
+  const cutin = document.getElementById("cutinLose");
+  const cutinText = document.getElementById("cutinLoseText");
+  if(!cutin || !cutinText) return;
+
+  cutinText.textContent = text;
+  cutin.classList.remove("show");
+  void cutin.offsetWidth; // アニメ再トリガー用
+  cutin.classList.add("show");
+
+  setTimeout(()=> cutin.classList.remove("show"), 2000);
+}
+
 // ===== Render =====
 function render(){
   const w = +$("win").value  || 0;
@@ -159,11 +187,17 @@ function render(){
           requestAnimationFrame(()=>{
             card.classList.add("win-animate");
             setTimeout(()=>card.classList.remove("win-animate"),1200);
+
+            // ==== 勝ち抜けカットイン表示 ====
+            showCutin(`${p.name} 勝ち抜け！`);
           });
         } else if(newStatus === "lose"){
           requestAnimationFrame(()=>{
             card.classList.add("lose-animate");
             setTimeout(()=>card.classList.remove("lose-animate"),800);
+
+            // ==== 失格カットイン表示 ====
+            showCutinLose(`${p.name} 失格…`);
           });
         }
       }
@@ -231,6 +265,9 @@ function render(){
         requestAnimationFrame(()=>{
           box.classList.add("team-win-animate");
           setTimeout(()=> box.classList.remove("team-win-animate"), 1500);
+
+          // ==== チーム勝利カットイン ====
+          showCutin(`${t} チーム勝利！`);
         });
       }
 

@@ -46,14 +46,28 @@
 
     <!-- サイコロ（デフォルト非表示） -->
     <aside id="diceWrap" class="dice-wrap">
-      <div class="dice-buttons">
-        <button class="die" data-sides="6">🎲 d6</button>
-        <button class="die" data-sides="100">🎲 d100</button>
-      </div>
-      <div class="dice-results">
-        <div class="dice-box" id="d6"></div>
-        <div class="dice-box" id="d100"></div>
-      </div>
+    <div class="dice-buttons">
+    <button class="die" data-sides="6">🎲 d6</button>
+    <button class="die" data-sides="100">🎲 d100</button>
+    </div>
+    <div class="dice-results">
+    <div class="dice-box" id="d6"></div>
+    <div class="dice-box" id="d100"></div>
+    </div>
+</aside>
+
+<!-- 勝ち抜けカットイン -->
+<div id="cutin" class="cutin">
+  <span id="cutinText">〇〇勝ち抜け！</span>
+</div>
+
+<!-- 失格カットイン -->
+<div id="cutinLose" class="cutin-lose">
+  <span id="cutinLoseText">××失格…</span>
+</div>
+
+
+
     </aside>
   </section>
 
