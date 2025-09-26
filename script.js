@@ -1,4 +1,5 @@
 let people = [], teams = [];
+let teamStates = {}; // { teamName: { status:"normal"|"win", lastSumM:number } }
 const $ = id => document.getElementById(id);
 
 // ===== LocalStorage =====
@@ -20,7 +21,7 @@ function loadData(){
 function addPerson(){
   const name = $("nameInput").value.trim();
   if(!name) return;
-  people.push({ name, maru:0, batsu:0, team:"", status:"normal" });
+  people.push({ name, maru:0, batsu:0, team:"", status:"normal", _lastMaru:0, _lastBatsu:0 });
   $("nameInput").value = "";
   saveData(); render();
 }
@@ -36,10 +37,11 @@ function addTeam(){
   saveData(); render();
 }
 function deleteAllPeople(){ people = []; saveData(); render(); }
-function deleteAllTeams(){ teams = []; people.forEach(p => p.team=""); saveData(); render(); }
+function deleteAllTeams(){ teams = []; people.forEach(p => p.team=""); teamStates={}; saveData(); render(); }
 function deleteTeam(teamName){
   teams = teams.filter(t => t !== teamName);
   people.forEach(p => { if(p.team === teamName) p.team = ""; });
+  delete teamStates[teamName];
   saveData(); render();
 }
 
@@ -60,7 +62,14 @@ function saveName(i, v){
   saveData(); render();
 }
 function resetScores(){
-  people.forEach(p => { p.maru = 0; p.batsu = 0; p.status = "normal"; });
+  people.forEach(p => { 
+    p.maru = 0; 
+    p.batsu = 0; 
+    p.status = "normal"; 
+    p._lastMaru = 0; 
+    p._lastBatsu = 0;
+  });
+  teamStates = {};
   saveData(); render();
 }
 
@@ -105,32 +114,42 @@ function onDropToTeam(e, team){
   saveData(); render();
 }
 
-// ===== 勝ち抜けカットイン =====
+// ===== カットイン =====
 function showCutin(text){
-  const cutin = document.getElementById("cutin");
-  const cutinText = document.getElementById("cutinText");
-  if(!cutin || !cutinText) return;
-
-  cutinText.textContent = text;
-  cutin.classList.remove("show");
-  void cutin.offsetWidth; // アニメ再トリガー用
-  cutin.classList.add("show");
-
-  setTimeout(()=> cutin.classList.remove("show"), 2000);
+  const el = $("cutin");
+  const span = $("cutinText");
+  if(!el || !span) return;
+  span.textContent = text;
+  el.classList.remove("show"); void el.offsetWidth;
+  el.classList.add("show");
+  setTimeout(()=> el.classList.remove("show"), 2000);
 }
-
-// ===== 失格カットイン =====
 function showCutinLose(text){
-  const cutin = document.getElementById("cutinLose");
-  const cutinText = document.getElementById("cutinLoseText");
-  if(!cutin || !cutinText) return;
-
-  cutinText.textContent = text;
-  cutin.classList.remove("show");
-  void cutin.offsetWidth; // アニメ再トリガー用
-  cutin.classList.add("show");
-
-  setTimeout(()=> cutin.classList.remove("show"), 2000);
+  const el = $("cutinLose");
+  const span = $("cutinLoseText");
+  if(!el || !span) return;
+  span.textContent = text;
+  el.classList.remove("show"); void el.offsetWidth;
+  el.classList.add("show");
+  setTimeout(()=> el.classList.remove("show"), 2000);
+}
+function showCutinReach(text){
+  const el = $("cutinReach");
+  const span = $("cutinReachText");
+  if(!el || !span) return;
+  span.textContent = text;
+  el.classList.remove("show"); void el.offsetWidth;
+  el.classList.add("show");
+  setTimeout(()=> el.classList.remove("show"), 2000);
+}
+function showCutinDanger(text){
+  const el = $("cutinDanger");
+  const span = $("cutinDangerText");
+  if(!el || !span) return;
+  span.textContent = text;
+  el.classList.remove("show"); void el.offsetWidth;
+  el.classList.add("show");
+  setTimeout(()=> el.classList.remove("show"), 2000);
 }
 
 // ===== Render =====
@@ -173,7 +192,7 @@ function render(){
       card.setAttribute("ondragover",  "onDragOver(event)");
       card.setAttribute("ondragend",   "onDragEnd(event)");
 
-      // --- 状態判定（個人戦のみ） ---
+      // --- 状態判定 ---
       let newStatus = "normal";
       if(p.maru >= w) newStatus = "win";
       else if(l > 0 && p.batsu >= l) newStatus = "lose";
@@ -187,30 +206,51 @@ function render(){
           requestAnimationFrame(()=>{
             card.classList.add("win-animate");
             setTimeout(()=>card.classList.remove("win-animate"),1200);
-
-            // ==== 勝ち抜けカットイン表示 ====
             showCutin(`${p.name} 勝ち抜け！`);
           });
         } else if(newStatus === "lose"){
           requestAnimationFrame(()=>{
             card.classList.add("lose-animate");
             setTimeout(()=>card.classList.remove("lose-animate"),800);
-
-            // ==== 失格カットイン表示 ====
             showCutinLose(`${p.name} 失格…`);
           });
         }
       }
+
+      // リーチ／ピンチ判定
+      const reach = (newStatus === "normal" && w > 0 && p.maru === w - 1);
+      const danger = (newStatus === "normal" && l > 0 && p.batsu === l - 1);
+
+      if(reach && p._lastMaru !== p.maru) showCutinReach(`${p.name} リーチ！`);
+      if(danger && p._lastBatsu !== p.batsu) showCutinDanger(`${p.name} ピンチ！`);
+
+      // 前回スコア記録
+      p._lastMaru = p.maru;
+      p._lastBatsu = p.batsu;
       p.status = newStatus;
 
+      // 名前
       if($("editMode").checked){
         card.innerHTML += `<input value="${p.name}" onblur="saveName(${i}, this.value)" title="${p.name}" />`;
       }else{
         card.innerHTML += `<h3 class="name" title="${p.name}">${p.name}</h3>`;
       }
 
+      // スコア表示
       card.innerHTML += `<div class="scores"><span class="maru">${p.maru}</span> - <span class="batsu">${p.batsu}</span></div>`;
 
+      // リーチ／ピンチラベル
+      if(newStatus === "normal"){
+        if(reach && danger){
+          card.innerHTML += `<div class="status-label status-double">ダブルリーチ</div>`;
+        } else if(reach){
+          card.innerHTML += `<div class="status-label status-reach">リーチ</div>`;
+        } else if(danger){
+          card.innerHTML += `<div class="status-label status-danger">ピンチ</div>`;
+        }
+      }
+
+      // 操作ボタン
       const ops = document.createElement('div');
       ops.className = 'ops';
       ops.innerHTML = `
@@ -241,10 +281,40 @@ function render(){
       const sumM = members.reduce((a, p) => a + p.maru, 0);
       const sumB = members.reduce((a, p) => a + p.batsu, 0);
 
+      // === 先に box を作成 ===
       const box = document.createElement('div');
       box.className = 'team-box';
       box.setAttribute("ondrop",    `onDropToTeam(event, '${t}')`);
       box.setAttribute("ondragover","onDragOver(event)");
+
+      // チーム状態管理
+      if(!teamStates[t]) teamStates[t] = { status:"normal", lastSumM:0 };
+      const prevStatus = teamStates[t].status;
+      let newTeamStatus = "normal";
+      if(sumM >= w) newTeamStatus = "win";
+
+      // 勝利カットイン（初回のみ）
+      if(newTeamStatus === "win" && prevStatus !== "win"){
+        box.classList.add("team-win-state");
+        requestAnimationFrame(()=>{
+          box.classList.add("team-win-animate");
+          setTimeout(()=> box.classList.remove("team-win-animate"), 1500);
+          showCutin(`${t} チーム勝利！`);
+        });
+      }
+
+      // ✅ 再描画時に勝利済みなら色を維持
+      if(newTeamStatus === "win") {
+        box.classList.add("team-win-state");
+      }
+
+      // リーチカットイン（あと1点）
+      if(newTeamStatus === "normal" && w > 0 && sumM === w - 1 && teamStates[t].lastSumM !== sumM){
+        showCutinReach(`${t} チーム リーチ！`);
+      }
+
+      teamStates[t].status = newTeamStatus;
+      teamStates[t].lastSumM = sumM;
 
       const header = document.createElement('div');
       header.className = 'team-header';
@@ -257,19 +327,6 @@ function render(){
 
       header.innerHTML = `<span>${t}</span><span>${sumM} - ${sumB} ${winMark} ${delTeamBtn}</span>`;
       box.appendChild(header);
-
-      // --- チーム勝利演出 ---
-      box.classList.remove("team-win-state");
-      if(sumM >= w){
-        box.classList.add("team-win-state");
-        requestAnimationFrame(()=>{
-          box.classList.add("team-win-animate");
-          setTimeout(()=> box.classList.remove("team-win-animate"), 1500);
-
-          // ==== チーム勝利カットイン ====
-          showCutin(`${t} チーム勝利！`);
-        });
-      }
 
       const table = document.createElement('table');
       table.innerHTML = `<thead><tr><th>名前</th><th>◯</th><th>✕</th><th>操作</th></tr></thead>`;
@@ -327,7 +384,6 @@ function render(){
 // ===== Events =====
 window.onload = () => {
   loadData();
-
   if($("diceWrap")) $("diceWrap").style.display = $("diceToggle")?.checked ? 'block' : 'none';
 
   if($("nameInput")){

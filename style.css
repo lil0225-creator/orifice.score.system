@@ -375,4 +375,107 @@ td{ white-space:nowrap; }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
 }
 
+/* リーチカットイン */
+.cutin-reach {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  padding: 28px 56px;
+  background: rgba(255, 235, 59, 0.15);
+  border: 3px solid #ffeb3b;
+  border-radius: 20px;
+  font-size: 64px;
+  font-weight: 900;
+  color: #ffee58;
+  text-shadow:
+    -2px -2px 0 #888,
+     2px -2px 0 #888,
+    -2px  2px 0 #888,
+     2px  2px 0 #888,
+     0 0 12px #ffeb3b,
+     0 0 24px #fff176;
+  letter-spacing: 4px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+}
+.cutin-reach.show { animation: cutinReachFlash 2s ease forwards; }
 
+@keyframes cutinReachFlash {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(0.5) rotate(-15deg); }
+  20%  { opacity:1; transform:translate(-50%,-50%) scale(1.2) rotate(0deg); }
+  60%  { opacity:1; transform:translate(-50%,-50%) scale(1.0); }
+  100% { opacity:0; transform:translate(-50%,-50%) scale(1.3) rotate(5deg); }
+}
+
+/* 失格リーチ（ピンチ）カットイン */
+.cutin-danger {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  padding: 28px 56px;
+  background: rgba(255, 111, 0, 0.15);
+  border: 3px solid #ff6f00;
+  border-radius: 20px;
+  font-size: 64px;
+  font-weight: 900;
+  color: #ff9100;
+  text-shadow:
+    -2px -2px 0 #333,
+     2px -2px 0 #333,
+    -2px  2px 0 #333,
+     2px  2px 0 #333,
+     0 0 12px #ff6f00,
+     0 0 24px #ff9800;
+  letter-spacing: 4px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+}
+.cutin-danger.show { animation: cutinDangerFlash 2s ease forwards; }
+
+@keyframes cutinDangerFlash {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(0.5) rotate(15deg); }
+  20%  { opacity:1; transform:translate(-50%,-50%) scale(1.2) rotate(0deg); }
+  60%  { opacity:1; transform:translate(-50%,-50%) scale(1.0); }
+  100% { opacity:0; transform:translate(-50%,-50%) scale(1.3) rotate(-5deg); }
+}
+
+/* リーチ／ピンチのラベル（右上控えめ） */
+.card .status-label {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+  opacity: 0.9;
+  border: 1px solid transparent;
+}
+
+/* 勝ち抜けリーチ */
+.card .status-reach {
+  background: rgba(255, 235, 59, 0.2);
+  color: #ffeb3b;
+  border-color: #ffeb3b55;
+}
+
+/* 失格リーチ（ピンチ） */
+.card .status-danger {
+  background: rgba(255, 111, 0, 0.2);
+  color: #ff9100;
+  border-color: #ff910055;
+}
+
+/* ダブルリーチ（左右で色分け） */
+.card .status-double {
+  background: linear-gradient(90deg,
+              rgba(255, 235, 59, 0.2) 0%,
+              rgba(255, 235, 59, 0.2) 50%,
+              rgba(255, 111, 0, 0.2) 50%,
+              rgba(255, 111, 0, 0.2) 100%);
+  color: #fff;
+  border: 1px solid #ffeb3b55;
+  text-shadow: 0 0 4px #ff9100;
+}
